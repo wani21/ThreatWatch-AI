@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import auth, alerts, events, users
+from app.api.routes import auth, alerts, events, users, analysis, anomaly
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -26,6 +26,8 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["Threat Alerts"])
 app.include_router(events.router, prefix="/api/v1/events", tags=["Login Events"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["User Profiles"])
+app.include_router(analysis.router, prefix="/api", tags=["Threat Analysis"])
+app.include_router(anomaly.router, prefix="/api", tags=["Anomaly Detection"])
 
 
 @app.get("/health", status_code=status.HTTP_200_OK, tags=["Health"])
