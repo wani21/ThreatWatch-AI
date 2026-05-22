@@ -70,3 +70,7 @@ yarn-error.log*
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Machine Learning Models
+*.pkl
+*.pickle

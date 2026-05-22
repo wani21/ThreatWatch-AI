@@ -34,6 +34,11 @@ class LoginEvent(Base):
     
     latitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    
+    country_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True, index=True)
+    auth_method: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    source: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    isp: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="login_events")
