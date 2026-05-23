@@ -1,0 +1,20 @@
+[
+  "login_hour",
+  "day_of_week",
+  "is_weekend",
+  "is_night",
+  "is_business",
+  "failed_attempt_count",
+  "login_failed",
+  "vpn_detected",
+  "tor_detected",
+  "new_device",
+  "new_location",
+  "impossible_travel",
+  "country_enc",
+  "city_enc",
+  "device_type_enc",
+  "browser_enc",
+  "login_frequency_7d",
+  "avg_failed_7d"
+]
