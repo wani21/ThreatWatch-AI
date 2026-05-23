@@ -20,12 +20,14 @@ class Settings(BaseSettings):
     
     DATABASE_URL: Optional[str] = None
 
-    # SMTP Mail Settings
-    EMAIL_HOST: str = "smtp.gmail.com"
-    EMAIL_PORT: int = 587
-    EMAIL_USERNAME: Optional[str] = None
-    EMAIL_PASSWORD: Optional[str] = None
-    EMAIL_RECEIVER: Optional[str] = None
+    # Alert & SMTP Settings
+    ALERT_THRESHOLD_SCORE: float = 60.0
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    ALERT_EMAIL_FROM: str = "omkarkh.1920@gmail.com"
+    ADMIN_EMAIL: str = "20230140302@mitaoe.ac.in"
 
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
