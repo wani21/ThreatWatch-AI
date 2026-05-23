@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreatWatch-AI | Immersive Live Login Telemetry</title>
+    <!-- Google Fonts Import -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --bg-color: #080c14;
+            --card-bg: rgba(13, 20, 35, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --neon-cyan: #06b6d4;
+            --neon-violet: #8b5cf6;
+            --neon-emerald: #10b981;
+            --neon-amber: #f59e0b;
+            --neon-crimson: #ef4444;
+            
+            --glow-cyan: 0 0 15px rgba(6, 182, 212, 0.4);
+            --glow-violet: 0 0 15px rgba(139, 92, 246, 0.4);
+            --glow-emerald: 0 0 20px rgba(16, 185, 129, 0.5);
+            --glow-amber: 0 0 20px rgba(245, 158, 11, 0.5);
+            --glow-crimson: 0 0 25px rgba(239, 68, 68, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(30, 27, 75, 0.6) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(15, 23, 42, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Ambient Glow Ring Background */
+        .ambient-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
+            filter: blur(40px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Container Card */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            width: 100%;
+            max-width: 460px;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet));
+            box-shadow: 0 1px 10px rgba(6, 182, 212, 0.5);
+        }
+
+        /* Logo & Header */
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: var(--neon-violet);
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: var(--glow-violet);
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff 60%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Form Controls */
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 13px 16px 13px 44px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15), var(--glow-cyan);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .form-input:focus + .input-icon {
+            color: var(--neon-cyan);
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--neon-violet) 0%, #6d28d9 100%);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 24px;
+            box-shadow: var(--glow-violet);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* HUD Live Telemetry Dashboard Panel */
+        .telemetry-panel {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 28px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            color: var(--neon-cyan);
+            border-left: 3px solid var(--neon-cyan);
+            position: relative;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .telemetry-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .telemetry-pulse {
+            width: 7px;
+            height: 7px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: var(--glow-cyan);
+            animation: pulse-blink 1.5s infinite alternate;
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            row-gap: 4px;
+            column-gap: 10px;
+        }
+
+        .telemetry-lbl {
+            color: var(--text-secondary);
+        }
+
+        .telemetry-val {
+            text-align: right;
+            word-break: break-all;
+        }
+
+        /* Interactive Threat Verdict HUD Overlay */
+        .verdict-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0d121f;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .verdict-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .verdict-shield {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .verdict-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .verdict-score-box {
+            font-family: 'Outfit', sans-serif;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #ffffff 50%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .verdict-score-lbl {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .verdict-factors-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 14px;
+            width: 100%;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 24px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .verdict-factor-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .verdict-factor-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .verdict-factor-bullet {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Color Tiers for Verdicts */
+        .verdict-low .verdict-shield {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--neon-emerald);
+            box-shadow: var(--glow-emerald);
+        }
+        .verdict-low .verdict-title { color: var(--neon-emerald); }
+        .verdict-low .verdict-factor-bullet { background: var(--neon-emerald); }
+
+        .verdict-medium .verdict-shield {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--neon-amber);
+            box-shadow: var(--glow-amber);
+        }
+        .verdict-medium .verdict-title { color: var(--neon-amber); }
+        .verdict-medium .verdict-factor-bullet { background: var(--neon-amber); }
+
+        .verdict-high .verdict-shield {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--neon-crimson);
+            box-shadow: var(--glow-crimson);
+        }
+        .verdict-high .verdict-title { color: var(--neon-crimson); }
+        .verdict-high .verdict-factor-bullet { background: var(--neon-crimson); }
+
+        /* Spinner Animation */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border-left-color: #ffffff;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        /* Keyframes */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); }
+            100% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.6); }
+        }
+
+        @keyframes pulse-blink {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    
+    <div class="login-card">
+        <!-- Interactive Verdict HUD Overlay -->
+        <div id="verdictOverlay" class="verdict-overlay">
+            <div class="verdict-shield">
+                <i id="verdictIcon" data-lucide="shield-check" style="width: 36px; height: 36px;"></i>
+            </div>
+            <div id="verdictTitle" class="verdict-title">Access Allowed</div>
+            <div id="verdictScore" class="verdict-score-box">08</div>
+            <div class="verdict-score-lbl">Risk Score (0-100)</div>
+            
+            <div class="verdict-factors-box">
+                <div class="verdict-factor-title">Detected Threat Elements</div>
+                <div id="verdictFactorsList">
+                    <!-- Dynamic Threat bullet entries -->
+                </div>
+            </div>
+            
+            <button class="btn-back" onclick="resetForm()">
+                <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Back to Login
+            </button>
+        </div>
+
+        <!-- Main Login Form -->
+        <div class="header">
+            <div class="brand-icon">
+                <i data-lucide="shield-alert" style="width: 26px; height: 26px;"></i>
+            </div>
+            <h1>ThreatWatch-AI</h1>
+            <p class="subtitle">AI-Powered Login Threat Analytics Daemon</p>
+        </div>
+        
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label class="form-label">User Email Address</label>
+                <div class="input-wrapper">
+                    <input type="email" id="email" class="form-input" required placeholder="name@sentinel.ai" value="20230140302@mitaoe.ac.in">
+                    <i data-lucide="mail" class="input-icon"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" class="form-input" required placeholder="••••••••••••" value="password123">
+                    <i data-lucide="lock" class="input-icon"></i>
+                </div>
+            </div>
+            
+            <button type="submit" id="btnSubmit" class="btn-submit">
+                <span class="spinner" id="submitSpinner"></span>
+                <span id="btnText">Execute Ingestion & Sign In</span>
+                <i data-lucide="log-in" id="submitIcon" style="width: 18px; height: 18px;"></i>
+            </button>
+        </form>
+
+        <!-- Demo Simulation Control -->
+        <div style="margin-top: 20px; text-align: center;">
+            <p style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.7;">Developer Demonstration Sandbox</p>
+            <button type="button" id="btnDemo" onclick="triggerImpossibleTravelDemo()" style="width: 100%; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--neon-crimson); font-size: 13px; font-weight: 600; font-family: inherit; padding: 12px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.05);">
+                <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+                Simulate Impossible Travel (Live Alert)
+            </button>
+        </div>
+
+        <!-- Live Telemetry HUD Console Panel -->
+        <div class="telemetry-panel">
+            <div class="telemetry-title">
+                <span class="telemetry-pulse"></span>
+                <span>Live Client Telemetry HUD</span>
+            </div>
+            <div class="telemetry-grid">
+                <span class="telemetry-lbl">IP ADDRESS :</span>
+                <span id="telIp" class="telemetry-val">Resolving...</span>
+                
+                <span class="telemetry-lbl">LOCATION   :</span>
+                <span id="telLoc" class="telemetry-val">Resolving...</span>
+                
+                <span class="telemetry-lbl">OS / SYSTEM:</span>
+                <span id="telOs" class="telemetry-val">Parsing...</span>
+                
+                <span class="telemetry-lbl">BROWSER    :</span>
+                <span id="telBr" class="telemetry-val">Parsing...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global storage for parsed client telemetry
+        const clientTelemetry = {
+            ip: "127.0.0.1",
+            city: "Pune",
+            country: "India",
+            device_type: "Windows",
+            browser: "Chrome"
+        };
+
+        // 1. Parse Operating System
+        function getOS() {
+            const ua = navigator.userAgent;
+            if (ua.includes("Windows")) return "Windows";
+            if (ua.includes("Macintosh") || ua.includes("Mac OS")) return "MacOS";
+            if (ua.includes("Linux") && !ua.includes("Android")) return "Linux";
+            if (ua.includes("Android")) return "Android";
+            if (ua.includes("iPhone") || ua.includes("iPad")) return "iPhone";
+            return "Windows";
+        }
+
+        // 2. Parse Browser Name
+        function getBrowser() {
+            const ua = navigator.userAgent;
+            if (ua.includes("Chrome") && !ua.includes("Edg")) return "Chrome";
+            if (ua.includes("Safari") && !ua.includes("Chrome")) return "Safari";
+            if (ua.includes("Edg")) return "Edge";
+            if (ua.includes("Firefox")) return "Firefox";
+            return "Chrome";
+        }
+
+        // 3. Page load initializations
+        window.addEventListener("DOMContentLoaded", () => {
+            // Initialize Lucide vector icons
+            lucide.createIcons();
+            
+            // Set parsed device specs in telemetry model
+            clientTelemetry.device_type = getOS();
+            clientTelemetry.browser = getBrowser();
+            
+            document.getElementById("telOs").innerText = clientTelemetry.device_type.toUpperCase();
+            document.getElementById("telBr").innerText = clientTelemetry.browser.toUpperCase();
+
+            // Fetch live IP Geolocation telemetry on load
+            fetch("https://ipapi.co/json/")
+                .then(res => {
+                    if (!res.ok) throw new Error("Network resolution failed");
+                    return res.json();
+                })
+                .then(data => {
+                    clientTelemetry.ip = data.ip || "127.0.0.1";
+                    clientTelemetry.city = data.city || "Pune";
+                    clientTelemetry.country = data.country_name || "India";
+                    
+                    document.getElementById("telIp").innerText = clientTelemetry.ip;
+                    document.getElementById("telLoc").innerText = `${clientTelemetry.city.toUpperCase()}, ${clientTelemetry.country.toUpperCase()}`;
+                })
+                .catch(err => {
+                    console.log("[-] Geolocation resolution error, falling back to baseline defaults:", err);
+                    document.getElementById("telIp").innerText = "127.0.0.1 (DEV LOOPBACK)";
+                    document.getElementById("telLoc").innerText = "PUNE, INDIA (DEFAULT)";
+                });
+        });
+
+        // 4. API Login & Risk Pipeline Trigger handler
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            
+            // Show loading spinner
+            document.getElementById("submitSpinner").style.display = "inline-block";
+            document.getElementById("submitIcon").style.display = "none";
+            document.getElementById("btnText").innerText = "Processing Telemetry...";
+            document.getElementById("btnSubmit").disabled = true;
+
+            const payload = {
+                email: email,
+                password: password,
+                city: clientTelemetry.city,
+                country: clientTelemetry.country,
+                device_type: clientTelemetry.device_type,
+                browser: clientTelemetry.browser,
+                ip_address: clientTelemetry.ip
+            };
+
+            console.log("[*] Dispatching auth event telemetry payload:", payload);
+
+            // POST to backend API
+            fetch("http://localhost:8000/api/v1/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail || "Authentication Failed") });
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("[+] Security pipeline verdict received:", data);
+                displayVerdict(data);
+            })
+            .catch(err => {
+                alert(`Error: ${err.message}`);
+                resetSubmitButton();
+            });
+        }
+
+        // 5. Reset submission button back to interactive state
+        function resetSubmitButton() {
+            document.getElementById("submitSpinner").style.display = "none";
+            document.getElementById("submitIcon").style.display = "inline-block";
+            document.getElementById("btnText").innerText = "Execute Ingestion & Sign In";
+            document.getElementById("btnSubmit").disabled = false;
+            if (document.getElementById("btnDemo")) {
+                document.getElementById("btnDemo").disabled = false;
+                document.getElementById("btnDemo").innerText = "Simulate Impossible Travel (Live Alert)";
+            }
+        }
+
+        // 5b. Developer Sandbox: Simulation of Impossible Travel Threat
+        function triggerImpossibleTravelDemo() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            
+            // Show loading spinner on form and simulation button
+            document.getElementById("submitSpinner").style.display = "inline-block";
+            document.getElementById("submitIcon").style.display = "none";
+            document.getElementById("btnText").innerText = "Simulating Travel Threat...";
+            document.getElementById("btnSubmit").disabled = true;
+            
+            const btnDemo = document.getElementById("btnDemo");
+            btnDemo.disabled = true;
+            btnDemo.innerHTML = `<span class="spinner" style="display:inline-block; margin-right:8px;"></span> Seeding Pune Baseline...`;
+
+            // 1. Establish the base legitimate login from Pune, India
+            const basePayload = {
+                email: email,
+                password: password,
+                city: "Pune",
+                country: "India",
+                device_type: "Windows",
+                browser: "Chrome",
+                ip_address: "103.111.222.36"
+            };
+
+            console.log("[*] Seeding base legitimate login (Pune):", basePayload);
+
+            fetch("http://localhost:8000/api/v1/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(basePayload)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail || "Baseline seeding failed") });
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("[+] Baseline legitimate login established.");
+                btnDemo.innerHTML = `<span class="spinner" style="display:inline-block; margin-right:8px;"></span> Triggering New York Threat...`;
+                
+                // 2. Dispatch the NY travel event to trigger impossible travel!
+                const threatPayload = {
+                    email: email,
+                    password: password,
+                    city: "New York",
+                    country: "USA",
+                    device_type: "MacOS", // Different device to trigger NewDeviceDetector too
+                    browser: "Safari",
+                    ip_address: "198.51.100.22"
+                };
+
+                console.log("[*] Dispatching suspicious travel login (NY):", threatPayload);
+
+                // Wait 1.5 seconds to ensure timestamps are slightly separated
+                return new Promise(resolve => setTimeout(() => {
+                    resolve(fetch("http://localhost:8000/api/v1/auth/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(threatPayload)
+                    }));
+                }, 1500));
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail || "Threat simulation failed") });
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("[+] Security pipeline verdict for travel event received:", data);
+                displayVerdict(data);
+            })
+            .catch(err => {
+                alert(`Simulation Error: ${err.message}`);
+                resetSubmitButton();
+            });
+        }
+
+        // 6. Displays the high-fidelity Verdict HUD Shield Overlay
+        function displayVerdict(data) {
+            const overlay = document.getElementById("verdictOverlay");
+            const scoreBox = document.getElementById("verdictScore");
+            const titleBox = document.getElementById("verdictTitle");
+            const factorsList = document.getElementById("verdictFactorsList");
+            const iconEl = document.getElementById("verdictIcon");
+            
+            // Reset overlay classes
+            overlay.className = "verdict-overlay";
+            factorsList.innerHTML = "";
+            
+            // Map risk tier
+            const tier = data.risk_level.toUpperCase(); // LOW, MEDIUM, HIGH, CRITICAL
+            
+            if (tier === "LOW") {
+                overlay.classList.add("verdict-low");
+                titleBox.innerText = data.authenticated ? "Access Allowed" : "Auth Failed (Low Risk)";
+                iconEl.setAttribute("data-lucide", data.authenticated ? "shield-check" : "shield-alert");
+            } else if (tier === "MEDIUM") {
+                overlay.classList.add("verdict-medium");
+                titleBox.innerText = "MFA Required";
+                iconEl.setAttribute("data-lucide", "shield-question");
+            } else {
+                overlay.classList.add("verdict-high");
+                titleBox.innerText = "Suspicious Lockout";
+                iconEl.setAttribute("data-lucide", "shield-x");
+            }
+            
+            // Re-render Lucide icon
+            lucide.createIcons();
+
+            // Set Risk score
+            scoreBox.innerText = data.risk_score.toString().padStart(2, '0');
+
+            // Render triggered factor list
+            if (!data.triggered_factors || data.triggered_factors.length === 0) {
+                factorsList.innerHTML = `
+                    <div class="verdict-factor-item">
+                        <span class="verdict-factor-bullet"></span>
+                        <span>Normal baseline matching. Safe connection.</span>
+                    </div>`;
+            } else {
+                data.triggered_factors.forEach(factor => {
+                    const item = document.createElement("div");
+                    item.className = "verdict-factor-item";
+                    item.innerHTML = `
+                        <span class="verdict-factor-bullet"></span>
+                        <span>${factor}</span>`;
+                    factorsList.appendChild(item);
+                });
+            }
+
+            // Animate overlay open
+            overlay.classList.add("active");
+        }
+
+        // 7. Resets the login form and hides overlay
+        function resetForm() {
+            document.getElementById("verdictOverlay").classList.remove("active");
+            document.getElementById("password").value = "";
+            resetSubmitButton();
+        }
+    </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from app.core.database import SessionLocal
+from app.core.database import SessionLocal, Base, engine
 from app.models.user import User
 from app.models.device import Device
 from app.models.user_profile import UserBehaviorProfile
@@ -17,6 +17,10 @@ def main():
     print("=" * 75)
     print("      THREATWATCH-AI - HACKATHON DEMO USER SEEDER")
     print("=" * 75)
+
+    print("[*] Initializing database schema...")
+    Base.metadata.create_all(bind=engine)
+    print("[+] Database schema verified / initialized.")
 
     db: Session = SessionLocal()
     try:
@@ -34,7 +38,8 @@ def main():
         accounts = [
             {"email": "admin@sentinel.ai", "username": "admin", "role": "Administrator", "dept": "Security"},
             {"email": "employee1@sentinel.ai", "username": "employee1", "role": "Employee", "dept": "Engineering"},
-            {"email": "employee2@sentinel.ai", "username": "employee2", "role": "Employee", "dept": "Marketing"}
+            {"email": "employee2@sentinel.ai", "username": "employee2", "role": "Employee", "dept": "Marketing"},
+            {"email": "20230140302@mitaoe.ac.in", "username": "sentinel_user", "role": "Employee", "dept": "Operations"}
         ]
 
         print("\n[*] Commencing seeding of hackathon demo accounts...")

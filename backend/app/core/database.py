@@ -5,12 +5,19 @@ from app.core.config import settings
 
 # Create standard SQLAlchemy engine
 # pool_pre_ping is enabled to prevent stale connection errors
-engine = create_engine(
-    settings.DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20
-)
+db_url = settings.DATABASE_URL or "sqlite:///threatwatch.db"
+if db_url.startswith("sqlite"):
+    engine = create_engine(
+        db_url,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(
+        db_url,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=20
+    )
 
 # Create transactional SessionLocal class
 SessionLocal = sessionmaker(
