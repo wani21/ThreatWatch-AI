@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.auth import LoginRequest, LoginResponse
+from app.schemas.auth import LoginRequest, LoginResponse, SignUpRequest, SignUpResponse
 from app.services.auth_service import AuthService
 
 router = APIRouter()
@@ -107,3 +107,17 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     """
     auth_service = AuthService(db)
     return auth_service.authenticate_and_analyze(credentials)
+
+
+@router.post(
+    "/signup",
+    response_model=SignUpResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user inside PostgreSQL with default trusted baseline devices"
+)
+def signup(payload: SignUpRequest, db: Session = Depends(get_db)):
+    """
+    Saves a new Employee or Administrator profile dynamically in the live database in real time.
+    """
+    auth_service = AuthService(db)
+    return auth_service.register_user(payload)

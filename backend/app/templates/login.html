@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreatWatch-AI | Gateway Portal</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --glass-bg: rgba(15, 23, 42, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-glow: rgba(0, 242, 254, 0.15);
+            --accent-primary: #00f2fe;
+            --accent-secondary: #4facfe;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 5% 5%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
+                radial-gradient(at 95% 95%, rgba(79, 172, 254, 0.08) 0px, transparent 50%);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            z-index: -1;
+            opacity: 0.15;
+            transition: opacity 0.3s ease;
+        }
+
+        .brand-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        /* Nav Pills Custom Theme */
+        .soc-nav-pills {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 30px;
+        }
+
+        .soc-pill-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 10px 0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            width: 50%;
+            text-align: center;
+        }
+
+        .soc-pill-btn.active {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #0b0f19;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group-text {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            border-right: none;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-primary);
+            color: var(--text-main);
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
+        }
+
+        .form-select option {
+            background-color: #0b0f19;
+            color: var(--text-main);
+        }
+
+        .btn-cyber {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            border: none;
+            color: #0b0f19;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 14px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-cyber:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 242, 254, 0.4);
+            color: #0b0f19;
+        }
+
+        /* Preset Tray Drawer */
+        .simulator-tray {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .simulator-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .simulator-title {
+            font-size: 13px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+        }
+
+        .simulator-body {
+            padding: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .simulator-tray.collapsed .simulator-body {
+            display: none;
+        }
+
+        .preset-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            color: var(--text-main);
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: left;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preset-btn:hover {
+            background: rgba(0, 242, 254, 0.08);
+            border-color: var(--accent-primary);
+        }
+
+        .preset-btn.active {
+            background: rgba(0, 242, 254, 0.15);
+            border-color: var(--accent-primary);
+        }
+
+        .threat-tag {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tag-low { background: rgba(25, 135, 84, 0.2); color: #198754; }
+        .tag-med { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .tag-high { background: rgba(253, 126, 20, 0.2); color: #fd7e14; }
+        .tag-crit { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
+
+        /* Security Analysis Result Overlay */
+        .analysis-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 25, 0.95);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            text-align: center;
+        }
+
+        .analysis-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .radar-spinner {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 242, 254, 0.1);
+            border-top-color: var(--accent-primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-badge {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 8px 24px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .score-dial {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 52px;
+            line-height: 1;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+
+    <div class="login-card">
+        <!-- Security Verdict Overlay -->
+        <div class="analysis-overlay" id="verdictOverlay">
+            <div id="loadingState">
+                <div class="radar-spinner mx-auto"></div>
+                <h5 class="fw-bold mb-2" id="scanHeadline">Analyzing Behavior Signatures...</h5>
+                <p class="small text-muted mb-0">Running Rule Engines & ML Isolation Forest Model</p>
+            </div>
+            
+            <div id="resultState" class="d-none w-100">
+                <h4 class="fw-bold mb-1" id="authHeadline">Access Granted</h4>
+                <p class="small text-muted mb-4" id="userScope">admin@sentinel.ai</p>
+                
+                <div id="verdictStats">
+                    <div class="score-dial" id="verdictScore">06</div>
+                    <div class="score-label">Combined Threat Score</div>
+                    <div class="result-badge mx-auto d-inline-block" id="verdictLevel">Low Risk</div>
+                </div>
+
+                <div class="mb-4 text-start p-3 rounded bg-white bg-opacity-5 d-none" id="factorsContainer">
+                    <div class="small fw-bold text-uppercase mb-1" style="color: #ffc107; font-size: 10px; letter-spacing: 0.5px;">Triggered Indicators</div>
+                    <ul class="small mb-0 text-muted ps-3" id="factorsList"></ul>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-light btn-sm rounded-pill py-2" id="actionBtn" onclick="proceedToDashboard()">
+                        Proceed to Dashboard
+                    </button>
+                    <button class="btn btn-link text-decoration-none text-muted btn-sm" onclick="resetOverlay()">
+                        Close & Back
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brand Header -->
+        <div class="brand-logo">THREATWATCH<span style="font-weight: 300;">-AI</span></div>
+        <div class="brand-subtitle">Interactive Real-Time Database Gateway</div>
+
+        <!-- Tabbed Navigation Switch -->
+        <div class="soc-nav-pills d-flex">
+            <button class="soc-pill-btn active" id="tabSignIn" onclick="switchTab('signin')">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Sign In
+            </button>
+            <button class="soc-pill-btn" id="tabSignUp" onclick="switchTab('signup')">
+                <i class="fa-solid fa-user-plus me-1"></i> Register
+            </button>
+        </div>
+
+        <!-- Form 1: SIGN IN VIEW -->
+        <div id="viewSignIn">
+            <div id="loginErrorAlert" class="alert alert-danger d-none py-2 px-3 mb-3 small" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                <span id="loginErrorMsg">Invalid email or password. Please try again.</span>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="form-label mb-2">Account Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="name@sentinel.ai" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label mb-2">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••••••" required>
+                    </div>
+                </div>
+
+                <!-- Hidden parameters resolved silently -->
+                <input type="hidden" id="city" value="Pune">
+                <input type="hidden" id="country" value="India">
+                <input type="hidden" id="device_type" value="Windows">
+                <input type="hidden" id="browser" value="Chrome">
+                <input type="hidden" id="ip_address" value="103.111.222.33">
+
+                <button type="submit" class="btn btn-cyber w-100 mt-2">
+                    <i class="fa-solid fa-shield-halved me-2"></i> Authenticate & Scan
+                </button>
+            </form>
+        </div>
+
+        <!-- Form 2: SIGN UP VIEW (Real Time PostgreSQL registration) -->
+        <div id="viewSignUp" class="d-none">
+            <form id="signupForm" onsubmit="handleSignUp(event)">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label mb-1">Username</label>
+                        <input type="text" id="regUsername" class="form-control" placeholder="sec_analyst" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label mb-1">Department</label>
+                        <input type="text" id="regDept" class="form-control" placeholder="Security" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label mb-1">Registration Role</label>
+                    <select id="regRole" class="form-select" required>
+                        <option value="Employee" selected>Employee (Normal User)</option>
+                        <option value="Administrator">Administrator (SOC Admin)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label mb-1">Account Email</label>
+                    <input type="email" id="regEmail" class="form-control" placeholder="name@sentinel.ai" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label mb-1">Security Password</label>
+                    <input type="password" id="regPassword" class="form-control" placeholder="••••••••••••" required>
+                </div>
+
+                <button type="submit" class="btn btn-cyber w-100">
+                    <i class="fa-solid fa-user-check me-2"></i> Save User inside PostgreSQL
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Simulator Tray (SOC Demo Mode) -->
+    <div class="simulator-tray collapsed" id="simTray">
+        <div class="simulator-header" onclick="toggleTray()">
+            <span class="simulator-title"><i class="fa-solid fa-flask-vial me-2"></i> SOC Threat Simulator</span>
+            <i class="fa-solid fa-chevron-up" id="trayChevron"></i>
+        </div>
+        <div class="simulator-body">
+            <p class="small text-muted mb-3">
+                Simulate distinct employee behavioral profiles to instantly trigger the threat engines.
+            </p>
+
+            <button class="preset-btn active" id="preset-1" onclick="selectPreset(1, 'admin@sentinel.ai', 'password123', 'Pune', 'India', 'Windows', 'Chrome', '103.111.222.33')">
+                <div>
+                    <div class="fw-bold">1. Admin Pune Login</div>
+                    <div class="small text-muted">Admin Account, Safe Geo</div>
+                </div>
+                <span class="threat-tag tag-low">Low</span>
+            </button>
+
+            <button class="preset-btn" id="preset-2" onclick="selectPreset(2, 'employee1@sentinel.ai', 'wrong_pwd', 'Pune', 'India', 'Windows', 'Chrome', '103.111.222.33')">
+                <div>
+                    <div class="fw-bold">2. Failed Login</div>
+                    <div class="small text-muted">Wrong password baseline</div>
+                </div>
+                <span class="threat-tag tag-low">Low</span>
+            </button>
+
+            <button class="preset-btn" id="preset-3" onclick="selectPreset(3, 'employee1@sentinel.ai', 'wrong_pwd', 'Pune', 'India', 'Windows', 'Chrome', '45.11.22.33')">
+                <div>
+                    <div class="fw-bold">3. Brute Force (5x Fail)</div>
+                    <div class="small text-muted">Consecutive Auth Failures</div>
+                </div>
+                <span class="threat-tag tag-high">High</span>
+            </button>
+
+            <button class="preset-btn" id="preset-4" onclick="selectPreset(4, 'employee2@sentinel.ai', 'password123', 'Pune', 'India', 'iPhone', 'Safari', '103.111.222.35')">
+                <div>
+                    <div class="fw-bold">4. Unknown Device</div>
+                    <div class="small text-muted">iPhone + Safari Mismatch</div>
+                </div>
+                <span class="threat-tag tag-med">Medium</span>
+            </button>
+
+            <button class="preset-btn" id="preset-5" onclick="selectPreset(5, 'admin@sentinel.ai', 'password123', 'New York', 'USA', 'Windows', 'Chrome', '198.51.100.22')">
+                <div>
+                    <div class="fw-bold">5. Impossible Travel</div>
+                    <div class="small text-muted">Pune → NYC displacement</div>
+                </div>
+                <span class="threat-tag tag-crit">Critical</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Tab Switch logic
+        function switchTab(mode) {
+            const tabSignIn = document.getElementById('tabSignIn');
+            const tabSignUp = document.getElementById('tabSignUp');
+            const viewSignIn = document.getElementById('viewSignIn');
+            const viewSignUp = document.getElementById('viewSignUp');
+
+            if (mode === 'signin') {
+                tabSignIn.classList.add('active');
+                tabSignUp.classList.remove('active');
+                viewSignIn.classList.remove('d-none');
+                viewSignUp.classList.add('d-none');
+            } else {
+                tabSignUp.classList.add('active');
+                tabSignIn.classList.remove('active');
+                viewSignUp.classList.remove('d-none');
+                viewSignIn.classList.add('d-none');
+            }
+        }
+
+        // Collapsible Simulator tray
+        function toggleTray() {
+            const tray = document.getElementById('simTray');
+            const chev = document.getElementById('trayChevron');
+            if (tray.classList.contains('collapsed')) {
+                tray.classList.remove('collapsed');
+                chev.className = 'fa-solid fa-chevron-down';
+            } else {
+                tray.classList.add('collapsed');
+                chev.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
+        // Silent automatic telemetry
+        async function runAutoTelemetry() {
+            try {
+                const ua = navigator.userAgent;
+                
+                // Browser parse
+                let browserName = "Chrome";
+                if (ua.indexOf("Firefox") > -1) browserName = "Firefox";
+                else if (ua.indexOf("Safari") > -1 && ua.indexOf("Chrome") === -1) browserName = "Safari";
+                else if (ua.indexOf("Edg") > -1) browserName = "Edge";
+                document.getElementById('browser').value = browserName;
+
+                // OS parse
+                let osName = "Windows";
+                if (ua.indexOf("Mac") > -1) osName = "Mac";
+                else if (ua.indexOf("Android") > -1) osName = "Android";
+                else if (ua.indexOf("iPhone") > -1) osName = "iPhone";
+                document.getElementById('device_type').value = osName;
+
+                // IP resolve
+                const ipRes = await fetch("https://api.ipify.org?format=json");
+                if (ipRes.ok) {
+                    const data = await ipRes.json();
+                    document.getElementById('ip_address').value = data.ip;
+                }
+
+                // Location geocode fallback
+                const geoRes = await fetch("https://ipapi.co/json/");
+                if (geoRes.ok) {
+                    const geoData = await geoRes.json();
+                    document.getElementById('city').value = geoData.city || "Pune";
+                    document.getElementById('country').value = geoData.country_name || "India";
+                }
+            } catch (err) {
+                console.log("Telemetry capture safely center-pinned Pune default.", err);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', runAutoTelemetry);
+
+        // Select Preset
+        let selectedPresetId = 1;
+        let isBruteForceSimulating = false;
+
+        function selectPreset(id, email, password, city, country, device, browser, ip) {
+            selectedPresetId = id;
+            switchTab('signin');
+
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`preset-${id}`).classList.add('active');
+
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = password === 'wrong_pwd' ? 'wrong_password_999' : password;
+            document.getElementById('city').value = city;
+            document.getElementById('country').value = country;
+            document.getElementById('device_type').value = device;
+            document.getElementById('browser').value = browser;
+            document.getElementById('ip_address').value = ip;
+            
+            isBruteForceSimulating = (id === 3);
+        }
+
+        function resetOverlay() {
+            document.getElementById('verdictOverlay').classList.remove('active');
+            document.getElementById('loadingState').classList.remove('d-none');
+            document.getElementById('resultState').classList.add('d-none');
+        }
+
+        function proceedToDashboard() {
+            const role = localStorage.getItem('tw_logged_in_role');
+            if (role === "Administrator") {
+                window.location.href = "/admin/dashboard";
+            } else {
+                window.location.href = "/home";
+            }
+        }
+
+        // Action: Sign Up Handler (Real-Time Database Save)
+        async function handleSignUp(e) {
+            e.preventDefault();
+            
+            const overlay = document.getElementById('verdictOverlay');
+            const headline = document.getElementById('scanHeadline');
+            
+            headline.innerText = "Registering Account inside PostgreSQL...";
+            overlay.classList.add('active');
+
+            const username = document.getElementById('regUsername').value;
+            const department = document.getElementById('regDept').value;
+            const role = document.getElementById('regRole').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            const payload = { username, department, role, email, password };
+
+            try {
+                const response = await fetch("/api/v1/auth/signup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                setTimeout(() => {
+                    document.getElementById('loadingState').classList.add('d-none');
+                    const rsState = document.getElementById('resultState');
+                    rsState.classList.remove('d-none');
+
+                    document.getElementById('userScope').innerText = email;
+                    const authHeadline = document.getElementById('authHeadline');
+                    
+                    if (response.ok) {
+                        authHeadline.innerText = "Registration Succeeded!";
+                        authHeadline.style.color = "#00f2fe";
+                        
+                        document.getElementById('verdictStats').innerHTML = `
+                            <div class="py-3"><i class="fa-solid fa-circle-check text-success fa-4x mb-3"></i></div>
+                            <p class="small text-muted mb-4">Account role <strong>${role}</strong> saved inside database in real time.</p>
+                        `;
+
+                        const proceedBtn = document.getElementById('actionBtn');
+                        proceedBtn.innerText = "Switch to Sign In & Test";
+                        proceedBtn.className = "btn btn-outline-cyan btn-sm rounded-pill py-2";
+                        proceedBtn.style.color = "#00f2fe";
+                        proceedBtn.style.borderColor = "#00f2fe";
+                        proceedBtn.onclick = () => {
+                            resetOverlay();
+                            switchTab('signin');
+                            document.getElementById('loginEmail').value = email;
+                            document.getElementById('loginPassword').value = password;
+                            // Clear form
+                            document.getElementById('signupForm').reset();
+                        };
+                    } else {
+                        throw new Error(data.detail || "Registration failed.");
+                    }
+                }, 1000);
+
+            } catch (err) {
+                document.getElementById('loadingState').classList.add('d-none');
+                const rsState = document.getElementById('resultState');
+                rsState.classList.remove('d-none');
+                
+                document.getElementById('authHeadline').innerText = "Registration Failed";
+                document.getElementById('authHeadline').style.color = "#dc3545";
+                document.getElementById('verdictStats').innerHTML = `
+                    <div class="py-3"><i class="fa-solid fa-triangle-exclamation text-danger fa-4x mb-3"></i></div>
+                    <p class="small text-danger">${err.message}</p>
+                `;
+            }
+        }
+
+        // Action: Sign In & Scan Telemetry
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            // Clear any previous error alerts
+            document.getElementById('loginErrorAlert').classList.add('d-none');
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const city = document.getElementById('city').value;
+            const country = document.getElementById('country').value;
+            const device_type = document.getElementById('device_type').value;
+            const browser = document.getElementById('browser').value;
+            const ip_address = document.getElementById('ip_address').value;
+
+            const payload = { email, password, city, country, device_type, browser, ip_address };
+
+            // We activate overlay for scan (only shown during scanning, or for HIGH/CRITICAL threats)
+            const overlay = document.getElementById('verdictOverlay');
+            document.getElementById('scanHeadline').innerText = "Analyzing Behavioral Signatures...";
+            overlay.classList.add('active');
+
+            try {
+                // Background brute force simulator trigger if selected
+                if (isBruteForceSimulating) {
+                    const failPayload = { ...payload, password: "wrong_password_999" };
+                    for (let i = 0; i < 5; i++) {
+                        await fetch("/api/v1/auth/login", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(failPayload)
+                        });
+                    }
+                }
+
+                const response = await fetch("/api/v1/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Authentication check failed.");
+                }
+
+                const data = await response.json();
+
+                // If authentication itself failed, trigger incorrect password warning banner on login form instantly!
+                if (!data.authenticated) {
+                    resetOverlay();
+                    const alertEl = document.getElementById('loginErrorAlert');
+                    const errorMsgEl = document.getElementById('loginErrorMsg');
+                    alertEl.classList.remove('d-none');
+                    errorMsgEl.innerText = "Invalid email or password. Please try again.";
+                    return;
+                }
+
+                // Check user role from db list to resolve admin vs normal employee routing
+                const usersResponse = await fetch("/api/v1/users/?limit=100");
+                let matchedUserRole = "Employee";
+                if (usersResponse.ok) {
+                    const usersData = await usersResponse.json();
+                    const matchedUser = usersData.users.find(u => u.email === email);
+                    if (matchedUser) {
+                        matchedUserRole = matchedUser.role;
+                    }
+                }
+
+                // Save identity in localStorage for dynamic DB queries
+                localStorage.setItem('tw_logged_in_email', email);
+                localStorage.setItem('tw_logged_in_role', matchedUserRole);
+
+                if (matchedUserRole === "Administrator") {
+                    // Admins bypass overlays directly to SOC dashboard
+                    resetOverlay();
+                    window.location.href = "/admin/dashboard";
+                    return;
+                }
+
+                // Safe Employee logins bypass scan overlays directly
+                if (data.risk_level === "LOW" || data.risk_level === "MEDIUM") {
+                    resetOverlay();
+                    window.location.href = "/home";
+                    return;
+                }
+
+                // If credentials match but threat is HIGH/CRITICAL, block access & display metrics to SOC overlay
+                setTimeout(() => {
+                    document.getElementById('loadingState').classList.add('d-none');
+                    const rsState = document.getElementById('resultState');
+                    rsState.classList.remove('d-none');
+
+                    document.getElementById('userScope').innerText = `${email} (${matchedUserRole})`;
+                    const authHeadline = document.getElementById('authHeadline');
+                    const proceedBtn = document.getElementById('actionBtn');
+                    const verdictStats = document.getElementById('verdictStats');
+                    const fcContainer = document.getElementById('factorsContainer');
+
+                    // Critical/High Risk Lockdown Verdict
+                    authHeadline.innerText = "Access Blocked - Security Flag Triggered";
+                    authHeadline.style.color = "#dc3545";
+
+                    verdictStats.innerHTML = `
+                        <div class="score-dial" id="verdictScore">00</div>
+                        <div class="score-label">Combined Threat Score</div>
+                        <div class="result-badge mx-auto d-inline-block" id="verdictLevel">LOW RISK</div>
+                    `;
+
+                    // Populate stats
+                    const score = data.risk_score;
+                    const dial = document.getElementById('verdictScore');
+                    dial.innerText = score < 10 ? `0${score}` : score;
+
+                    const badge = document.getElementById('verdictLevel');
+                    badge.innerText = `${data.risk_level} RISK`;
+                    badge.className = `result-badge mx-auto d-inline-block severity-${data.risk_level.toLowerCase()}`;
+
+                    if (data.risk_level === "HIGH") {
+                        badge.style.backgroundColor = "rgba(253, 126, 20, 0.2)";
+                        badge.style.color = "#fd7e14";
+                    } else {
+                        badge.style.backgroundColor = "rgba(220, 53, 69, 0.2)";
+                        badge.style.color = "#dc3545";
+                    }
+
+                    // Triggered indicators list
+                    const fcList = document.getElementById('factorsList');
+                    fcList.innerHTML = "";
+                    
+                    if (data.triggered_factors && data.triggered_factors.length > 0) {
+                        fcContainer.classList.remove('d-none');
+                        data.triggered_factors.forEach(factor => {
+                            const li = document.createElement('li');
+                            li.innerText = factor;
+                            fcList.appendChild(li);
+                        });
+                    } else {
+                        fcContainer.classList.add('d-none');
+                    }
+
+                    proceedBtn.innerText = "Access Blocked by SOC Policy";
+                    proceedBtn.className = "btn btn-danger btn-sm rounded-pill py-2 disabled";
+                    proceedBtn.onclick = null;
+                }, 1000);
+
+            } catch (err) {
+                resetOverlay();
+                const alertEl = document.getElementById('loginErrorAlert');
+                const errorMsgEl = document.getElementById('loginErrorMsg');
+                alertEl.classList.remove('d-none');
+                errorMsgEl.innerText = err.message || "Authentication check failed.";
+            }
+        }
+    </script>
+</body>
+</html>

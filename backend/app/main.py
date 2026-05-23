@@ -1,7 +1,12 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import auth, alerts, events, users, analysis, anomaly, risk
+from app.api.routes import auth, alerts, events, users, analysis, anomaly, risk, templates, dashboard
+
+# Self-healing startup: Auto-create PostgreSQL database tables if they do not exist
+from app.core.database import Base, engine
+import app.models  # Import models to ensure they are registered with Base metadata
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -22,7 +27,9 @@ app.add_middleware(
 )
 
 # Register API Routers
+app.include_router(templates.router, tags=["Web Views"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(dashboard.router, prefix="/api/v1/analysis", tags=["Threat Analysis"])
 app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["Threat Alerts"])
 app.include_router(events.router, prefix="/api/v1/events", tags=["Login Events"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["User Profiles"])
@@ -47,4 +54,4 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     # Primarily for ease of execution when launching main.py directly
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
