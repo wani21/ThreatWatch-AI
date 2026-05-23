@@ -43,6 +43,8 @@ def get_login_events(
             {
                 "id": str(e.id),
                 "user_id": str(e.user_id),
+                "user_email": e.user.email if e.user else "unknown@threatwatch.ai",
+                "user_username": e.user.username if e.user else "unknown",
                 "timestamp": e.timestamp,
                 "status": e.status,
                 "ip_address": e.ip_address,
@@ -57,7 +59,12 @@ def get_login_events(
                 "longitude": e.longitude,
                 "auth_method": e.auth_method,
                 "source": e.source,
-                "isp": e.isp
+                "isp": e.isp,
+                "risk_assessment": {
+                    "score": int(e.risk_assessment.total_score) if e.risk_assessment else 0,
+                    "level": e.risk_assessment.risk_level if e.risk_assessment else "LOW",
+                    "factors": e.risk_assessment.risk_factors if e.risk_assessment else []
+                } if e.risk_assessment else None
             }
             for e in events
         ]

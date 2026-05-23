@@ -43,7 +43,16 @@ def get_alerts(
                 "severity": a.severity,
                 "message": a.message,
                 "status": a.status,
-                "created_at": a.created_at
+                "created_at": a.created_at,
+                "user_email": a.risk_assessment.login_event.user.email if (a.risk_assessment and a.risk_assessment.login_event and a.risk_assessment.login_event.user) else "unknown@threatwatch.ai",
+                "user_username": a.risk_assessment.login_event.user.username if (a.risk_assessment and a.risk_assessment.login_event and a.risk_assessment.login_event.user) else "unknown",
+                "ip_address": a.risk_assessment.login_event.ip_address if (a.risk_assessment and a.risk_assessment.login_event) else "0.0.0.0",
+                "city": a.risk_assessment.login_event.city if (a.risk_assessment and a.risk_assessment.login_event) else "",
+                "country": a.risk_assessment.login_event.country if (a.risk_assessment and a.risk_assessment.login_event) else "",
+                "browser": a.risk_assessment.login_event.browser if (a.risk_assessment and a.risk_assessment.login_event) else "",
+                "os": a.risk_assessment.login_event.os if (a.risk_assessment and a.risk_assessment.login_event) else "",
+                "risk_score": int(a.risk_assessment.total_score) if a.risk_assessment else 0,
+                "factors": a.risk_assessment.risk_factors if a.risk_assessment else []
             }
             for a in alerts
         ]

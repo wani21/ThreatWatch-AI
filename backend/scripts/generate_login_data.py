@@ -561,7 +561,7 @@ def main() -> None:
         users = generate_users(db, fake, count=100)
         devices = generate_devices(db, users)
         generate_user_profiles(db, users, devices)
-        events_inserted = generate_login_events(db, users, devices, fake, total_events=20000)
+        events_inserted = generate_login_events(db, users, devices, fake, total_events=2000)
 
         # Print final report
         print("\n" + "=" * 50)

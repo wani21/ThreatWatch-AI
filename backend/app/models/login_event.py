@@ -39,6 +39,7 @@ class LoginEvent(Base):
     auth_method: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     source: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     isp: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    otp_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="login_events")

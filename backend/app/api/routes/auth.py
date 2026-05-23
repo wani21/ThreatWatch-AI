@@ -107,3 +107,18 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     """
     auth_service = AuthService(db)
     return auth_service.authenticate_and_analyze(credentials)
+
+
+from pydantic import BaseModel
+
+class Verify2FARequest(BaseModel):
+    event_id: str
+    otp_code: str
+
+@router.post("/verify-2fa", status_code=status.HTTP_200_OK)
+def verify_2fa(payload: Verify2FARequest, db: Session = Depends(get_db)):
+    """
+    Validates the 6-digit OTP code to complete authentication for a high-risk login event.
+    """
+    auth_service = AuthService(db)
+    return auth_service.verify_otp(payload.event_id, payload.otp_code)

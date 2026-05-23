@@ -27,3 +27,6 @@ class LoginResponse(BaseModel):
     risk_level: str = Field(..., description="Unified risk level classification: LOW, MEDIUM, HIGH, CRITICAL.")
     anomaly_score: float = Field(..., description="Pre-trained Isolation Forest behavioral anomaly score [0.0, 1.0].")
     triggered_factors: List[str] = Field(..., description="Detailed list of explanation factors triggered across all security layers.")
+    mfa_required: bool = Field(False, description="Flag indicating if 2-Factor Authentication is required.")
+    role: str = Field("User", description="The role of the authenticated user.")
+

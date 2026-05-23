@@ -312,3 +312,84 @@ class AlertManager:
             print("-"*80)
             print(plain_text)
             print("="*80 + "\n")
+
+    def send_otp_email(self, user: User, event: LoginEvent, otp: str) -> None:
+        """
+        Dispatches a beautiful, high-fidelity 2-Factor OTP verification email to the user.
+        """
+        subject = "Security Alert: 2-Factor OTP Verification Code Required"
+        recipient = user.email or f"{user.username}@threatwatch.ai"
+        
+        plain_text = (
+            f"Hello {user.username},\n\n"
+            f"A login attempt was initiated on your ThreatWatch-AI account that has triggered our severe security risk threshold.\n\n"
+            f"To complete authentication, please enter the following 6-digit OTP verification code on the login page:\n\n"
+            f"   >>> {otp} <<<\n\n"
+            f"MFA Details:\n"
+            f"- Time (UTC): {event.timestamp}\n"
+            f"- IP Address: {event.ip_address}\n"
+            f"- Location: {event.city or 'Unknown'}, {event.country or 'Unknown'}\n"
+            f"- Device: {event.browser} on {event.os} ({event.source})\n\n"
+            f"If you did not initiate this login attempt, please secure your account credentials immediately.\n\n"
+            f"Sincerely,\nThreatWatch-AI Security Daemon"
+        )
+        
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>2-Factor Verification Code</title>
+</head>
+<body style="font-family: 'Inter', Arial, sans-serif; background-color: #f8fafc; padding: 20px; color: #1e293b; margin: 0;">
+  <div style="max-width: 550px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <div style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); padding: 24px; text-align: center; color: #ffffff;">
+      <h2 style="margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0.5px;">2-Factor OTP Verification</h2>
+    </div>
+    <div style="padding: 28px; line-height: 1.6;">
+      <p>Hello <strong>{user.username}</strong>,</p>
+      <p>A login attempt was initiated on your ThreatWatch-AI account that has triggered our severe security risk thresholds due to a highly unusual context.</p>
+      
+      <p style="margin-top: 24px; text-align: center; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Your 6-Digit OTP Code:</p>
+      <div style="background-color: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; margin: 10px 0; text-align: center; font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #4f46e5;">
+        {otp}
+      </div>
+      <p style="font-size: 12px; text-align: center; color: #94a3b8; margin-top: 4px; margin-bottom: 24px;">(This code is valid for 10 minutes and should not be shared.)</p>
+      
+      <div style="background-color: #f8fafc; border-left: 4px solid #4f46e5; padding: 14px; border-radius: 4px; font-size: 13px; color: #334155; margin-bottom: 24px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 2px 0; font-weight: 600; width: 100px; color: #64748b;">Time (UTC):</td>
+            <td style="padding: 2px 0; color: #0f172a;">{event.timestamp}</td>
+          </tr>
+          <tr>
+            <td style="padding: 2px 0; font-weight: 600; color: #64748b;">IP Address:</td>
+            <td style="padding: 2px 0; color: #0f172a;">{event.ip_address}</td>
+          </tr>
+          <tr>
+            <td style="padding: 2px 0; font-weight: 600; color: #64748b;">Location:</td>
+            <td style="padding: 2px 0; color: #0f172a;">{event.city or 'Unknown'}, {event.country or 'Unknown'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 2px 0; font-weight: 600; color: #64748b;">Device:</td>
+            <td style="padding: 2px 0; color: #0f172a;">{event.browser} on {event.os} ({event.source})</td>
+          </tr>
+        </table>
+      </div>
+      
+      <p style="font-size: 13px; color: #64748b;">If you did not initiate this login request, please ignore this email or change your password immediately to protect your account.</p>
+    </div>
+    <div style="background-color: #f1f5f9; padding: 16px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+      This is an automated verification message from ThreatWatch-AI. Please do not reply directly.
+    </div>
+  </div>
+</body>
+</html>"""
+        
+        sent = self._send_email_via_smtp(recipient, subject, html_content, plain_text)
+        if not sent:
+            print("\n" + "="*80)
+            print(f"[CONSOLE LOG FALLBACK] DISPATCHING 2FA OTP CODE TO: {recipient}")
+            print(f"SUBJECT: {subject}")
+            print("-"*80)
+            print(plain_text)
+            print("="*80 + "\n")

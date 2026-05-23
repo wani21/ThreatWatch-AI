@@ -22,12 +22,19 @@ class RiskAssessmentService:
 
     def _ensure_schema_upgraded(self) -> None:
         """
-        Dynamically executes an idempotent ALTER TABLE query on PostgreSQL.
+        Dynamically executes an idempotent ALTER TABLE query on database.
         Ensures that existing databases are upgraded with the 'risk_factors' JSON column.
         """
         try:
-            self.db.execute(text("ALTER TABLE risk_assessments ADD COLUMN IF NOT EXISTS risk_factors JSON;"))
-            self.db.commit()
+            if self.db.bind.dialect.name == "sqlite":
+                result = self.db.execute(text("PRAGMA table_info(risk_assessments);")).fetchall()
+                cols = [r[1] for r in result]
+                if "risk_factors" not in cols:
+                    self.db.execute(text("ALTER TABLE risk_assessments ADD COLUMN risk_factors JSON;"))
+                    self.db.commit()
+            else:
+                self.db.execute(text("ALTER TABLE risk_assessments ADD COLUMN IF NOT EXISTS risk_factors JSON;"))
+                self.db.commit()
         except Exception as e:
             self.db.rollback()
             print(f"[!] Warning: Failed to run schema self-healing upgrade for risk_factors: {e}")

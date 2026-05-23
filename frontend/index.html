@@ -446,6 +446,12 @@
                 padding: 24px;
             }
         }
+
+        .otp-input:focus {
+            border-color: var(--neon-cyan) !important;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15), var(--glow-cyan) !important;
+            background: rgba(15, 23, 42, 0.8) !important;
+        }
     </style>
 </head>
 <body>
@@ -473,6 +479,41 @@
             </button>
         </div>
 
+        <!-- MFA (2FA) OTP Verification Overlay -->
+        <div id="mfaOverlay" class="verdict-overlay" style="background: rgba(13, 18, 31, 0.98); backdrop-filter: blur(25px);">
+            <div class="verdict-shield" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: var(--neon-violet); box-shadow: var(--glow-violet);">
+                <i data-lucide="shield-keyhole" style="width: 36px; height: 36px;"></i>
+            </div>
+            <div class="verdict-title" style="color: var(--neon-violet); margin-bottom: 8px;">MFA Verification</div>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; padding: 0 10px; line-height: 1.5;">
+                A severe security risk score of <span id="mfaRiskScore" style="color: var(--neon-crimson); font-weight: bold;">00</span> was detected.
+                An OTP has been dispatched to your email. Enter the 6-digit verification code below to authorize access.
+            </p>
+            
+            <form id="mfaForm" onsubmit="handleMFA(event)" style="width: 100%;">
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveOTPFocus(this, 2)" id="otp1" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; color: var(--neon-cyan); background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; outline: none; transition: all 0.3s ease;">
+                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveOTPFocus(this, 3)" id="otp2" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; color: var(--neon-cyan); background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; outline: none; transition: all 0.3s ease;">
+                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveOTPFocus(this, 4)" id="otp3" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; color: var(--neon-cyan); background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; outline: none; transition: all 0.3s ease;">
+                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveOTPFocus(this, 5)" id="otp4" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; color: var(--neon-cyan); background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; outline: none; transition: all 0.3s ease;">
+                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveOTPFocus(this, 6)" id="otp5" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; color: var(--neon-cyan); background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; outline: none; transition: all 0.3s ease;">
+                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveOTPFocus(this, null)" id="otp6" style="width: 42px; height: 48px; text-align: center; font-size: 20px; font-weight: bold; color: var(--neon-cyan); background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px; outline: none; transition: all 0.3s ease;">
+                    </div>
+                </div>
+                
+                <button type="submit" id="btnVerifyMFA" class="btn-submit" style="margin-top: 10px; background: linear-gradient(135deg, var(--neon-violet) 0%, #6d28d9 100%); box-shadow: var(--glow-violet);">
+                    <span class="spinner" id="mfaSpinner"></span>
+                    <span id="mfaBtnText">Verify & Authenticate</span>
+                    <i data-lucide="shield-check" id="mfaIcon" style="width: 18px; height: 18px;"></i>
+                </button>
+            </form>
+            
+            <button class="btn-back" onclick="cancelMFA()" style="margin-top: 16px; width: 100%; display: flex; justify-content: center; gap: 8px;">
+                <i data-lucide="x" style="width: 16px; height: 16px;"></i> Cancel
+            </button>
+        </div>
+
         <!-- Main Login Form -->
         <div class="header">
             <div class="brand-icon">
@@ -480,6 +521,12 @@
             </div>
             <h1>ThreatWatch-AI</h1>
             <p class="subtitle">AI-Powered Login Threat Analytics Daemon</p>
+            <div class="creds-help" style="margin-top: 12px; font-size: 11px; color: var(--text-secondary); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; line-height: 1.4; text-align: left;">
+                <strong style="color: var(--neon-cyan); display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">Seeded Credentials:</strong>
+                User 1: <code style="color: var(--text-primary);">20230140302@mitaoe.ac.in</code> / <code style="color: var(--text-primary);">password123</code><br>
+                User 2: <code style="color: var(--text-primary);">202301040161@mitaoe.ac.in</code> / <code style="color: var(--text-primary);">pass@123</code><br>
+                Admin: <code style="color: var(--text-primary);">admin@abc.com</code> / <code style="color: var(--text-primary);">pass@123</code>
+            </div>
         </div>
         
         <form id="loginForm" onsubmit="handleLogin(event)">
@@ -601,6 +648,8 @@
                 });
         });
 
+        let activeMfaEventId = null;
+
         // 4. API Login & Risk Pipeline Trigger handler
         function handleLogin(event) {
             event.preventDefault();
@@ -613,6 +662,9 @@
             document.getElementById("submitIcon").style.display = "none";
             document.getElementById("btnText").innerText = "Processing Telemetry...";
             document.getElementById("btnSubmit").disabled = true;
+            if (document.getElementById("btnDemo")) {
+                document.getElementById("btnDemo").disabled = true;
+            }
 
             const payload = {
                 email: email,
@@ -642,10 +694,30 @@
             })
             .then(data => {
                 console.log("[+] Security pipeline verdict received:", data);
-                displayVerdict(data);
+                
+                if (data.mfa_required) {
+                    activeMfaEventId = data.event_id;
+                    document.getElementById("mfaRiskScore").innerText = data.risk_score.toString().padStart(2, '0');
+                    document.getElementById("mfaOverlay").classList.add("active");
+                    // Focus on first OTP input
+                    setTimeout(() => {
+                        document.getElementById("otp1").focus();
+                    }, 300);
+                    resetSubmitButton();
+                } else if (data.authenticated) {
+                    if (data.role === "Administrator") {
+                        localStorage.setItem("admin_session", "active");
+                        window.location.href = "admin.html";
+                    } else {
+                        displayVerdict(data);
+                    }
+                } else {
+                    displayVerdict(data);
+                }
             })
             .catch(err => {
-                alert(`Error: ${err.message}`);
+                console.error("[-] Ingestion Error:", err);
+                displayLockoutVerdict(err.message);
                 resetSubmitButton();
             });
         }
@@ -735,10 +807,21 @@
             })
             .then(data => {
                 console.log("[+] Security pipeline verdict for travel event received:", data);
-                displayVerdict(data);
+                if (data.mfa_required) {
+                    activeMfaEventId = data.event_id;
+                    document.getElementById("mfaRiskScore").innerText = data.risk_score.toString().padStart(2, '0');
+                    document.getElementById("mfaOverlay").classList.add("active");
+                    setTimeout(() => {
+                        document.getElementById("otp1").focus();
+                    }, 300);
+                    resetSubmitButton();
+                } else {
+                    displayVerdict(data);
+                }
             })
             .catch(err => {
-                alert(`Simulation Error: ${err.message}`);
+                console.error("[-] Simulation Error:", err);
+                displayLockoutVerdict(err.message);
                 resetSubmitButton();
             });
         }
@@ -754,6 +837,7 @@
             // Reset overlay classes
             overlay.className = "verdict-overlay";
             factorsList.innerHTML = "";
+            scoreBox.style.fontSize = "42px";
             
             // Map risk tier
             const tier = data.risk_level.toUpperCase(); // LOW, MEDIUM, HIGH, CRITICAL
@@ -764,11 +848,11 @@
                 iconEl.setAttribute("data-lucide", data.authenticated ? "shield-check" : "shield-alert");
             } else if (tier === "MEDIUM") {
                 overlay.classList.add("verdict-medium");
-                titleBox.innerText = "MFA Required";
-                iconEl.setAttribute("data-lucide", "shield-question");
+                titleBox.innerText = "Suspicious (Medium Risk)";
+                iconEl.setAttribute("data-lucide", "shield-alert");
             } else {
                 overlay.classList.add("verdict-high");
-                titleBox.innerText = "Suspicious Lockout";
+                titleBox.innerText = "Severe Threat Blocked";
                 iconEl.setAttribute("data-lucide", "shield-x");
             }
             
@@ -796,9 +880,161 @@
                 });
             }
 
+            // If medium risk is allowed this time but locks future attempts, display a helpful caution note
+            if (tier === "MEDIUM" && data.authenticated) {
+                const cautionItem = document.createElement("div");
+                cautionItem.className = "verdict-factor-item";
+                cautionItem.innerHTML = `
+                    <span class="verdict-factor-bullet" style="background: var(--neon-amber);"></span>
+                    <span style="color: var(--neon-amber); font-weight: bold;">Account locked for future logins (5-minute cooldown active).</span>`;
+                factorsList.appendChild(cautionItem);
+            }
+
             // Animate overlay open
             overlay.classList.add("active");
         }
+
+        // Displays Lockout details
+        function displayLockoutVerdict(message) {
+            const overlay = document.getElementById("verdictOverlay");
+            const scoreBox = document.getElementById("verdictScore");
+            const titleBox = document.getElementById("verdictTitle");
+            const factorsList = document.getElementById("verdictFactorsList");
+            const iconEl = document.getElementById("verdictIcon");
+            
+            // Reset overlay classes
+            overlay.className = "verdict-overlay verdict-high";
+            factorsList.innerHTML = "";
+            
+            titleBox.innerText = "Access Blocked";
+            iconEl.setAttribute("data-lucide", "shield-off");
+            lucide.createIcons();
+            
+            scoreBox.innerText = "🔒";
+            scoreBox.style.fontSize = "48px";
+            
+            const item = document.createElement("div");
+            item.className = "verdict-factor-item";
+            item.innerHTML = `
+                <span class="verdict-factor-bullet" style="background: var(--neon-crimson);"></span>
+                <span style="color: var(--neon-crimson); font-weight: bold; font-family: sans-serif; font-size: 13px;">${message}</span>`;
+            factorsList.appendChild(item);
+            
+            overlay.classList.add("active");
+        }
+
+        // 2FA OTP code input helper
+        function moveOTPFocus(current, nextIndex) {
+            if (current.value.length === 1 && nextIndex) {
+                const nextInput = document.getElementById("otp" + nextIndex);
+                if (nextInput) nextInput.focus();
+            }
+        }
+
+        // MFA OTP Submission handler
+        function handleMFA(event) {
+            event.preventDefault();
+            
+            let code = "";
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById("otp" + i).value;
+            }
+            
+            if (code.length < 6) {
+                alert("Please enter a complete 6-digit verification code.");
+                return;
+            }
+            
+            document.getElementById("mfaSpinner").style.display = "inline-block";
+            document.getElementById("mfaIcon").style.display = "none";
+            document.getElementById("mfaBtnText").innerText = "Authorizing...";
+            document.getElementById("btnVerifyMFA").disabled = true;
+            
+            const payload = {
+                event_id: activeMfaEventId,
+                otp_code: code
+            };
+            
+            fetch("http://localhost:8000/api/v1/auth/verify-2fa", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.detail || "Verification Failed") });
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("[+] 2FA verification response:", data);
+                document.getElementById("mfaSpinner").style.display = "none";
+                document.getElementById("mfaIcon").style.display = "inline-block";
+                document.getElementById("mfaBtnText").innerText = "Access Granted";
+                
+                setTimeout(() => {
+                    cancelMFA();
+                    if (data.role === "Administrator") {
+                        localStorage.setItem("admin_session", "active");
+                        window.location.href = "admin.html";
+                    } else {
+                        const LowRiskVerdict = {
+                            authenticated: true,
+                            risk_score: 5,
+                            risk_level: "LOW",
+                            anomaly_score: 0.1,
+                            triggered_factors: ["2-Factor Authentication verified successfully"]
+                        };
+                        displayVerdict(LowRiskVerdict);
+                    }
+                }, 1000);
+            })
+            .catch(err => {
+                alert(`Verification Error: ${err.message}`);
+                document.getElementById("mfaSpinner").style.display = "none";
+                document.getElementById("mfaIcon").style.display = "inline-block";
+                document.getElementById("mfaBtnText").innerText = "Verify & Authenticate";
+                document.getElementById("btnVerifyMFA").disabled = false;
+            });
+        }
+
+        // Cancel and Close MFA Overlay
+        function cancelMFA() {
+            document.getElementById("mfaOverlay").classList.remove("active");
+            activeMfaEventId = null;
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById("otp" + i).value = "";
+            }
+            resetSubmitButton();
+        }
+
+        // Bind OTP inputs paste / backspace events
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('.otp-input').forEach((input, idx) => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !input.value && idx > 0) {
+                        const prevInput = document.getElementById('otp' + idx);
+                        if (prevInput) {
+                            prevInput.focus();
+                            prevInput.value = '';
+                        }
+                    }
+                });
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const text = e.clipboardData.getData('text').trim();
+                    if (/^\d{6}$/.test(text)) {
+                        for (let i = 0; i < 6; i++) {
+                            const el = document.getElementById('otp' + (i + 1));
+                            if (el) el.value = text[i];
+                        }
+                        document.getElementById('otp6').focus();
+                    }
+                });
+            });
+        });
 
         // 7. Resets the login form and hides overlay
         function resetForm() {
