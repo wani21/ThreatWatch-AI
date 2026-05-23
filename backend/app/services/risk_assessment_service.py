@@ -100,6 +100,14 @@ class RiskAssessmentService:
         self.db.commit()
         self.db.refresh(assessment)
 
+        # Trigger Alert Manager assessment routing in a resilient try-except block
+        try:
+            from app.services.alert_manager import AlertManager
+            alert_manager = AlertManager(self.db)
+            alert_manager.generate_and_route_alert(assessment)
+        except Exception as alert_err:
+            print(f"[AlertManager] [!] Warning: Alert Manager failed to route alert: {alert_err}")
+
         # Format and return the standard API response structure
         return {
             "event_id": str(event_id),

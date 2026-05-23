@@ -211,7 +211,15 @@ class AnomalyService:
         # 2. Extract 18-dimensional feature vector
         raw_vector = self.extract_features(event)
 
-        # 3. Apply StandardScaler
+        # 3. Handle model dry-run/mock mode fallback if assets are missing
+        if model_loader.model is None or model_loader.scaler is None:
+            print("[AnomalyService] [!] Warning: Running anomaly prediction in fallback mock mode (missing assets).")
+            return {
+                "anomaly_score": 0.05,
+                "is_anomalous": False
+            }
+
+        # 4. Apply StandardScaler
         scaled_vector = model_loader.scaler.transform(np.array(raw_vector).reshape(1, -1))
 
         # 4. Perform Isolation Forest Prediction & Score
