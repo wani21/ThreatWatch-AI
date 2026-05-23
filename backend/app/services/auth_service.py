@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.login_event import LoginEvent
 from app.models.device import Device
-from app.schemas.auth import LoginRequest
+from app.models.user_profile import UserBehaviorProfile
+from app.schemas.auth import LoginRequest, SignUpRequest
 from app.services.risk_assessment_service import RiskAssessmentService
 
 
@@ -128,4 +129,61 @@ class AuthService:
             "risk_level": risk_report["risk_level"],
             "anomaly_score": risk_report["anomaly_score"],
             "triggered_factors": risk_report["reasons"]
+        }
+
+    def register_user(self, payload: SignUpRequest) -> Dict[str, Any]:
+        """
+        Idempotently inserts a new user into PostgreSQL database in real time.
+        Creates baseline profiles to support rule checks and Isolation Forest calculations.
+        """
+        # 1. Verify user email uniqueness
+        existing_user = self.db.query(User).filter(User.email == payload.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User with email '{payload.email}' already exists."
+            )
+
+        # 2. Save User
+        new_user = User(
+            username=payload.username,
+            email=payload.email,
+            password=payload.password,  # Plain text password simplification
+            role=payload.role,          # Administrator or Employee
+            department=payload.department
+        )
+        self.db.add(new_user)
+        self.db.commit()
+        self.db.refresh(new_user)
+
+        # 3. Build and register default trusted device baseline (Windows Chrome)
+        device = Device(
+            user_id=new_user.id,
+            device_hash=f"trusted_device_hash_{new_user.username}",
+            browser="Chrome",
+            os="Windows",
+            device_type="desktop",
+            trusted=True
+        )
+        self.db.add(device)
+
+        # 4. Build and save default behavioral profile baseline (Pune, India daytime)
+        profile = UserBehaviorProfile(
+            user_id=new_user.id,
+            avg_login_hour=12.0,
+            std_login_hour=1.0,
+            common_city="Pune",
+            common_country="India",
+            common_browser="Chrome",
+            common_os="Windows",
+            login_frequency_per_day=3.0
+        )
+        self.db.add(profile)
+        self.db.commit()
+
+        print(f"[+] Real-Time Sign-Up Succeeded: Seeded user baseline for {payload.email}.")
+        return {
+            "success": True,
+            "message": "User registered successfully inside PostgreSQL in real time.",
+            "user_id": str(new_user.id)
         }

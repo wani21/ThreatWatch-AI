@@ -34,7 +34,7 @@ class FailedLoginDetector(BaseDetector):
             return DetectionResult(
                 detector_name=self.name,
                 triggered=True,
-                score=40.0,
+                score=60.0,
                 reason="Multiple failed login attempts detected"
             )
             

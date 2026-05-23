@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreatWatch-AI | Deep Forensics Analyst</title>
+    <!-- Route Guard (Must run instantly before rendering content to enforce permission boundaries) -->
+    <script>
+        (function() {
+            const role = localStorage.getItem('tw_logged_in_role');
+            if (role !== "Administrator") {
+                window.location.href = "/login";
+            }
+        })();
+    </script>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Leaflet.js Map CSS & JS (Dynamic Interactive Geolocation Mapping) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        :root {
+            --bg-color: #060911;
+            --card-bg: rgba(13, 20, 38, 0.7);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --accent-primary: #00f2fe;
+            --accent-secondary: #4facfe;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(79, 172, 254, 0.05) 0px, transparent 50%);
+        }
+
+        /* Navbar Layout */
+        .soc-navbar {
+            background-color: rgba(13, 20, 38, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 15px 30px;
+        }
+
+        .soc-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .soc-brand span {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 16px !important;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-primary);
+            background-color: rgba(0, 242, 254, 0.05);
+        }
+
+        /* Forensic visual cards */
+        .forensic-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .forensic-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 12px;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+        }
+
+        .forensic-metric-row {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-size: 14px;
+        }
+
+        .forensic-metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .forensic-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .forensic-val {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        /* Heatmap / Map element styling */
+        #forensicMap {
+            height: 280px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            z-index: 1;
+        }
+
+        /* Circle progress custom styling */
+        .score-circle-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 15px;
+        }
+
+        .score-circle-svg {
+            transform: rotate(-90deg);
+        }
+
+        .score-circle-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.03);
+            stroke-width: 10;
+        }
+
+        .score-circle-fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .score-display-num {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .score-display-num h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .score-display-num span {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Severity indicator badge */
+        .badge-severity {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 50px;
+            letter-spacing: 0.5px;
+        }
+
+        .severity-low { background: rgba(25, 135, 84, 0.15); color: #198754; border: 1px solid rgba(25, 135, 84, 0.2); }
+        .severity-medium { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.2); }
+        .severity-high { background: rgba(253, 126, 20, 0.15); color: #fd7e14; border: 1px solid rgba(253, 126, 20, 0.2); }
+        .severity-critical { background: rgba(220, 53, 69, 0.15); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.2); }
+
+        .factor-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .baseline-box {
+            background: rgba(255,255,255,0.01);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 13px;
+        }
+
+        .baseline-header {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg soc-navbar mb-4">
+        <div class="container-fluid">
+            <a class="soc-brand" href="/admin/dashboard"><i class="fa-solid fa-satellite-dish me-2"></i>THREATWATCH<span>.AI</span></a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/admin/dashboard"><i class="fa-solid fa-chart-line me-1"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/alerts"><i class="fa-solid fa-triangle-exclamation me-1"></i> Alerts</a></li>
+                    <li class="nav-item ms-3">
+                        <button class="btn btn-outline-danger btn-sm px-3 rounded-pill" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="container px-4 mb-5">
+        
+        <!-- Welcome back link -->
+        <div class="mb-4">
+            <a href="/admin/alerts" class="text-decoration-none text-muted small"><i class="fa-solid fa-arrow-left-long me-2"></i> Back to Incident Logs</a>
+        </div>
+
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <h4 class="fw-bold mb-1">Deep Forensic Threat Investigation</h4>
+                <p class="text-muted small mb-0">Target ID: <span class="font-monospace text-uppercase" style="font-size: 12px;">#{{ alert.id }}</span></p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-flex align-items-center justify-content-md-end gap-2">
+                    <span class="badge-severity severity-{{ alert.severity.toLowerCase() }}">{{ alert.severity }}</span>
+                    <span class="badge bg-white bg-opacity-5 border border-white border-opacity-10 text-uppercase p-2 rounded small">
+                        STATUS: {{ alert.status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Forensic Analysis Grid -->
+        <div class="row g-4">
+            
+            <!-- Left Grid: Forensic Telemetry and Interactive Leaflet Map -->
+            <div class="col-lg-7">
+                
+                <!-- Card 1: Forensic Telemetry -->
+                <div class="forensic-card">
+                    <div class="forensic-title"><i class="fa-solid fa-server me-2"></i> Access Auditing Telemetry</div>
+                    
+                    <div class="row forensic-metric-row">
+                        <div class="col-5 forensic-label">User Account</div>
+                        <div class="col-7 forensic-val text-white">{{ user.email }}</div>
+                    </div>
+                    
+                    <div class="row forensic-metric-row">
+                        <div class="col-5 forensic-label">Employee Username</div>
+                        <div class="col-7 forensic-val text-white">{{ user.username }} ({{ user.role }} | {{ user.department }})</div>
+                    </div>
+
+                    <div class="row forensic-metric-row">
+                        <div class="col-5 forensic-label">IP Address Source</div>
+                        <div class="col-7 forensic-val font-monospace" style="color: var(--accent-primary);">{{ login_event.ip_address }}</div>
+                    </div>
+
+                    <div class="row forensic-metric-row">
+                        <div class="col-5 forensic-label">Physical Location</div>
+                        <div class="col-7 forensic-val text-white">
+                            {{ login_event.city or 'Unknown' }}, {{ login_event.country or 'Unknown' }}
+                        </div>
+                    </div>
+
+                    <div class="row forensic-metric-row">
+                        <div class="col-5 forensic-label">Client Browser</div>
+                        <div class="col-7 forensic-val text-white">{{ login_event.browser }}</div>
+                    </div>
+
+                    <div class="row forensic-metric-row">
+                        <div class="col-5 forensic-label">Operating System</div>
+                        <div class="col-7 forensic-val text-white">{{ login_event.os }}</div>
+                    </div>
+
+                    <div class="row forensic-metric-row">
+                        <div class="col-5 forensic-label">Access Timestamp</div>
+                        <div class="col-7 forensic-val text-white font-monospace" style="font-size: 12px;">{{ login_event.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Interactive Geolocation Locator (Heatmap Leaflet map USP) -->
+                <div class="forensic-card">
+                    <div class="forensic-title">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fa-solid fa-map-location-dot me-2"></i> Geographic Locator Map</span>
+                            <span class="small font-monospace text-muted" style="font-size: 11px;">
+                                LAT: {{ login_event.latitude or '0' }} | LON: {{ login_event.longitude or '0' }}
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Live Leaflet Map Container -->
+                    <div id="forensicMap"></div>
+                </div>
+
+            </div>
+
+            <!-- Right Grid: Score Breakdown & ML Diagnostics -->
+            <div class="col-lg-5">
+                
+                <!-- Card 3: Threat Score and Anomaly Score Dial -->
+                <div class="forensic-card text-center">
+                    <div class="forensic-title text-start"><i class="fa-solid fa-shield-virus me-2"></i> Threat Assessment</div>
+                    
+                    <div class="row align-items-center">
+                        <div class="col-6 border-end border-white border-opacity-10">
+                            <!-- Circular threat progress bar -->
+                            <div class="score-circle-wrapper">
+                                <svg class="score-circle-svg" width="140" height="140">
+                                    <circle class="score-circle-bg" cx="70" cy="70" r="60"></circle>
+                                    <circle class="score-circle-fill" id="threatFill" cx="70" cy="70" r="60" stroke="#dc3545" stroke-dasharray="377" stroke-dashoffset="377"></circle>
+                                </svg>
+                                <div class="score-display-num">
+                                    <h2 class="text-white" id="threatText">{{ risk_assessment.total_score | int }}</h2>
+                                    <span>RISK</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <!-- Anomaly Score -->
+                            <h5 class="text-muted small text-uppercase mb-2 font-monospace" style="letter-spacing: 0.5px;">Behavioral Score</h5>
+                            <h1 class="fw-bold font-monospace" style="font-size: 40px; color: var(--accent-primary);">
+                                {{ "%.4f" | format(risk_assessment.anomaly_score) }}
+                            </h1>
+                            <span class="badge bg-white bg-opacity-5 border border-white border-opacity-10 text-muted small p-1 px-2 rounded">
+                                Isolation Forest
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Dynamic Heuristic Scoring Checkpoints -->
+                <div class="forensic-card">
+                    <div class="forensic-title"><i class="fa-solid fa-list-check me-2"></i> Heuristic Checkpoints</div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="text-muted fw-semibold">Failed Credentials Checks</span>
+                            <span class="font-monospace fw-bold">{{ risk_assessment.failed_login_score | int }}%</span>
+                        </div>
+                        <div class="progress bg-white bg-opacity-5" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar bg-danger rounded" style="width: {{ risk_assessment.failed_login_score | int }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="text-muted fw-semibold">Unusual Temporal (Timing) Checks</span>
+                            <span class="font-monospace fw-bold">{{ risk_assessment.unusual_time_score | int }}%</span>
+                        </div>
+                        <div class="progress bg-white bg-opacity-5" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar bg-warning rounded" style="width: {{ risk_assessment.unusual_time_score | int }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="text-muted fw-semibold">Untrusted Device Matching</span>
+                            <span class="font-monospace fw-bold">{{ risk_assessment.new_device_score | int }}%</span>
+                        </div>
+                        <div class="progress bg-white bg-opacity-5" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar rounded" style="width: {{ risk_assessment.new_device_score | int }}%; background-color: var(--accent-secondary);"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="text-muted fw-semibold">Geographical & Travel Speed Checks</span>
+                            <span class="font-monospace fw-bold">{{ risk_assessment.new_location_score | int }}%</span>
+                        </div>
+                        <div class="progress bg-white bg-opacity-5" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar bg-info rounded" style="width: {{ risk_assessment.new_location_score | int }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Section: side-by-side Baseline Comparison and Triggered Factors -->
+        <div class="row g-4 mt-1">
+            
+            <!-- Dynamic Triggered Factors Indicator checklist -->
+            <div class="col-lg-6">
+                <div class="forensic-card h-100">
+                    <div class="forensic-title"><i class="fa-solid fa-flag me-2"></i> Triggered Risk Factors</div>
+                    
+                    {% if risk_assessment.risk_factors %}
+                        {% for factor in risk_assessment.risk_factors %}
+                            <div class="factor-item text-white">
+                                <i class="fa-solid fa-triangle-exclamation text-warning"></i>
+                                <span>{{ factor }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-circle-check text-success fa-2x mb-2 d-block"></i>
+                            No indicators matched (Authentication passed within baseline bounds)
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Employee Baseline Comparison Audit logs (USP) -->
+            <div class="col-lg-6">
+                <div class="forensic-card h-100">
+                    <div class="forensic-title"><i class="fa-solid fa-user-gear me-2"></i> Behavioral Profile Baselines</div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="baseline-box">
+                                <div class="baseline-header"><i class="fa-solid fa-house-laptop me-1"></i> Registered Profile</div>
+                                <div class="mb-2">
+                                    <span class="text-muted small d-block">Common Location</span>
+                                    <span class="fw-bold">{{ baseline.common_city or 'Pune' }}, {{ baseline.common_country or 'India' }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="text-muted small d-block">Common Device / OS</span>
+                                    <span class="fw-bold">{{ baseline.common_os or 'Windows' }} ({{ baseline.common_browser or 'Chrome' }})</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted small d-block">Avg Working Hour</span>
+                                    <span class="fw-bold font-monospace">{{ baseline.avg_login_hour or '12.0' }}:00 (Std: {{ baseline.std_login_hour or '1.0' }}h)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="baseline-box" style="border-color: rgba(0, 242, 254, 0.15);">
+                                <div class="baseline-header" style="color: var(--accent-primary);"><i class="fa-solid fa-signal me-1"></i> Current Access Scan</div>
+                                <div class="mb-2">
+                                    <span class="text-muted small d-block">Source Location</span>
+                                    <span class="fw-bold">{{ login_event.city or 'Unknown' }}, {{ login_event.country or 'Unknown' }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="text-muted small d-block">Client Device / OS</span>
+                                    <span class="fw-bold">{{ login_event.os }} ({{ login_event.browser }})</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted small d-block">Access Hour</span>
+                                    <span class="fw-bold font-monospace">{{ login_event.timestamp.strftime('%H:%M') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Map and SVG scripts -->
+    <script>
+        // Circular progress SVG fill calculation
+        window.addEventListener('DOMContentLoaded', () => {
+            const score = parseInt("{{ risk_assessment.total_score | int }}");
+            const fill = document.getElementById('threatFill');
+            
+            // Adjust stroke fill color based on risk severity
+            let color = "#198754"; // green
+            if (score > 30) color = "#ffc107"; // yellow
+            if (score > 60) color = "#fd7e14"; // orange
+            if (score > 80) color = "#dc3545"; // red
+            
+            fill.setAttribute('stroke', color);
+
+            // Radius is 60, circumference = 2 * PI * r ≈ 377
+            const offset = 377 - (score / 100) * 377;
+            fill.style.strokeDashoffset = offset;
+        });
+
+        // Dynamic Leaflet Map setup
+        // Set coordinates from postgres database records with defaults
+        const lat = parseFloat("{{ login_event.latitude or '18.5204' }}");
+        const lon = parseFloat("{{ login_event.longitude or '73.8567' }}");
+        const city = "{{ login_event.city or 'Pune' }}";
+
+        // Create Leaflet map centered at alert geolocation
+        const map = L.map('forensicMap').setView([lat, lon], 7);
+
+        // Load custom Dark Cyber CartoDB tile layer
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CartoDB &copy; OpenStreetMap contributors',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // Add glowing security pin marker
+        const threatMarker = L.circleMarker([lat, lon], {
+            color: "#dc3545",
+            fillColor: "#dc3545",
+            fillOpacity: 0.6,
+            radius: 8
+        }).addTo(map);
+
+        // Add visual pulse glow effect
+        L.circle([lat, lon], {
+            color: "#dc3545",
+            fillColor: "#dc3545",
+            fillOpacity: 0.15,
+            radius: 120000 // meters
+        }).addTo(map);
+
+        threatMarker.bindPopup(`<strong class="text-danger">Threat Point Detected</strong><br>Location: ${city}<br>IP Source: {{ login_event.ip_address }}`).openPopup();
+
+        // Log out handler
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "/login";
+        }
+    </script>
+</body>
+</html>

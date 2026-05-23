@@ -100,6 +100,58 @@ class RiskAssessmentService:
         self.db.commit()
         self.db.refresh(assessment)
 
+        # 6. Real-Time Alert Manager & Email Notification Dispatch
+        if assessment.risk_level in ["HIGH", "CRITICAL"]:
+            # Check if alert already exists for this risk assessment
+            from app.models.alert import Alert
+            from app.services.email_service import EmailService
+            
+            existing_alert = self.db.query(Alert).filter(Alert.risk_assessment_id == assessment.id).first()
+            if not existing_alert:
+                # Resolve alert type dynamically based on triggered reasons
+                alert_type = "suspicious_activity"
+                reasons_str = " ".join(assessment.risk_factors or []).lower()
+                
+                if "impossible travel" in reasons_str:
+                    alert_type = "impossible_travel"
+                elif "brute force" in reasons_str or "multiple failed" in reasons_str:
+                    alert_type = "brute_force"
+                elif "device" in reasons_str or "unknown device" in reasons_str:
+                    alert_type = "new_device"
+                elif "location" in reasons_str or "unusual location" in reasons_str:
+                    alert_type = "new_location"
+                elif "timing" in reasons_str or "unusual timing" in reasons_str:
+                    alert_type = "unusual_timings"
+
+                # Standard detailed threat message
+                threat_msg = f"Automated ThreatWatch Alert: Detected high-severity {alert_type.replace('_', ' ')} incident. " \
+                             f"User account: {event.user.email if event.user else 'Unknown'}. Risk Score: {int(assessment.total_score)}/100."
+
+                new_alert = Alert(
+                    risk_assessment_id=assessment.id,
+                    alert_type=alert_type,
+                    severity=assessment.risk_level.lower(),  # "high" or "critical"
+                    message=threat_msg,
+                    status="open"
+                )
+                self.db.add(new_alert)
+                self.db.commit()
+                self.db.refresh(new_alert)
+                print(f"[+] Alert ticket {new_alert.id} saved in Alert Manager database.")
+
+                # Trigger Email Dispatch
+                user_email = event.user.email if event.user else "security@sentinel.ai"
+                geo_location = f"{event.city or 'Unknown'}, {event.country or 'Unknown'}"
+                
+                EmailService.send_security_alert(
+                    user_email=user_email,
+                    timestamp=event.timestamp,
+                    location=geo_location,
+                    risk_score=int(assessment.total_score),
+                    risk_level=assessment.risk_level,
+                    triggered_factors=assessment.risk_factors or []
+                )
+
         # Format and return the standard API response structure
         return {
             "event_id": str(event_id),

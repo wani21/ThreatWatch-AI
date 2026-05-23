@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     
     DATABASE_URL: Optional[str] = None
 
+    # SMTP Mail Settings
+    EMAIL_HOST: str = "smtp.gmail.com"
+    EMAIL_PORT: int = 587
+    EMAIL_USERNAME: Optional[str] = None
+    EMAIL_PASSWORD: Optional[str] = None
+    EMAIL_RECEIVER: Optional[str] = None
+
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def assemble_db_connection(cls, v: Optional[str], info: Any) -> Any:

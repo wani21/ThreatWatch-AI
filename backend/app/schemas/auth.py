@@ -27,3 +27,23 @@ class LoginResponse(BaseModel):
     risk_level: str = Field(..., description="Unified risk level classification: LOW, MEDIUM, HIGH, CRITICAL.")
     anomaly_score: float = Field(..., description="Pre-trained Isolation Forest behavioral anomaly score [0.0, 1.0].")
     triggered_factors: List[str] = Field(..., description="Detailed list of explanation factors triggered across all security layers.")
+
+
+class SignUpRequest(BaseModel):
+    """
+    Pydantic schema model representing a simulated hackathon user registration request.
+    """
+    username: str = Field(..., description="User's unique display username.", example="sec_analyst")
+    email: EmailStr = Field(..., description="User's login email address.", example="analyst@sentinel.ai")
+    password: str = Field(..., description="User's secure password.", example="password123")
+    role: str = Field(..., description="User role: Administrator or Employee.", example="Employee")
+    department: str = Field(..., description="User's department.", example="Engineering")
+
+
+class SignUpResponse(BaseModel):
+    """
+    Pydantic schema model representing the user registration response.
+    """
+    success: bool = Field(..., description="Flag indicating if registration was successful.")
+    message: str = Field(..., description="Status description.")
+    user_id: str = Field(..., description="The unique UUID key of the generated User record.")

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreatWatch-AI | Welcome Employee Workspace</title>
+    <!-- Route Guard (Must run instantly before rendering content to enforce permission boundaries) -->
+    <script>
+        (function() {
+            const role = localStorage.getItem('tw_logged_in_role');
+            const email = localStorage.getItem('tw_logged_in_email');
+            if (!email) {
+                window.location.href = "/login";
+            } else if (role === "Administrator") {
+                window.location.href = "/admin/dashboard";
+            }
+        })();
+    </script>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #080c14;
+            --card-bg: rgba(13, 20, 38, 0.7);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --accent-primary: #00f2fe;
+            --accent-secondary: #4facfe;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(79, 172, 254, 0.05) 0px, transparent 50%);
+        }
+
+        .soc-navbar {
+            background-color: rgba(13, 20, 38, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 15px 30px;
+        }
+
+        .soc-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .soc-brand span {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+        }
+
+        .metric-card.card-blue::after { background: var(--accent-secondary); }
+        .metric-card.card-green::after { background: #198754; }
+        .metric-card.card-orange::after { background: #fd7e14; }
+
+        .metric-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 32px;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .metric-icon {
+            font-size: 24px;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .soc-table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .table-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-custom {
+            margin-bottom: 0;
+        }
+
+        .table-custom th {
+            background-color: rgba(255,255,255,0.02) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 16px;
+        }
+
+        .table-custom td {
+            border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+            color: var(--text-main);
+            font-size: 13px;
+            padding: 14px 16px;
+            vertical-align: middle;
+            background-color: transparent !important;
+        }
+
+        .baseline-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 13px;
+        }
+
+        .baseline-header {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg soc-navbar mb-4">
+        <div class="container-fluid">
+            <a class="soc-brand" href="#"><i class="fa-solid fa-satellite-dish me-2"></i>THREATWATCH<span>.AI</span></a>
+            <div class="ms-auto mb-lg-0 align-items-center">
+                <span class="badge bg-white bg-opacity-5 border border-white border-opacity-10 text-muted p-2 rounded me-3">
+                    Employee Workspace
+                </span>
+                <button class="btn btn-outline-danger btn-sm px-3 rounded-pill" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="container px-4 mb-5">
+        
+        <!-- User Details Header -->
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <h4 class="fw-bold mb-1" id="userNameLabel">Welcome back...</h4>
+                <p class="text-muted small mb-0" id="userEmailLabel">connecting baseline details...</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-success bg-opacity-10 border border-success border-opacity-20 text-success p-2 rounded">
+                    <i class="fa-solid fa-circle-check me-1 small"></i> Workspace Active
+                </span>
+            </div>
+        </div>
+
+        <!-- Personal Metrics Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="metric-card card-blue d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-title">My Login Attempts</div>
+                        <div class="metric-value" id="stat-total-logins">0</div>
+                    </div>
+                    <div class="metric-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="metric-card card-green d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-title">Successful Logins</div>
+                        <div class="metric-value text-success" id="stat-success-logins">0</div>
+                    </div>
+                    <div class="metric-icon"><i class="fa-solid fa-circle-check"></i></div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="metric-card card-orange d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-title">Failed Logins</div>
+                        <div class="metric-value text-warning" id="stat-failed-logins">0</div>
+                    </div>
+                    <div class="metric-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row: Side by side Login audits and Profile baselines -->
+        <div class="row g-4">
+            
+            <!-- Left: Personal Login Audits -->
+            <div class="col-lg-7">
+                <div class="soc-table-card h-100">
+                    <div class="table-title">
+                        <span><i class="fa-solid fa-clock-rotate-left me-2 text-cyan"></i> My Recent Access History</span>
+                        <span class="badge bg-white bg-opacity-5 text-muted fw-normal" style="font-size: 11px;">Access Feed</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-custom align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Location</th>
+                                    <th>Device / OS</th>
+                                    <th>Browser</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userEventsBody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-cyan me-2" role="status"></div>
+                                        Fetching access logs...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Personal Behavioral Baselines -->
+            <div class="col-lg-5">
+                <div class="soc-table-card h-100">
+                    <div class="table-title">
+                        <span><i class="fa-solid fa-user-gear me-2 text-cyan"></i> Authorized Behavioral Baselines</span>
+                        <span class="badge bg-white bg-opacity-5 text-muted fw-normal" style="font-size: 11px;">Security Baselines</span>
+                    </div>
+
+                    <div class="baseline-box mb-3">
+                        <div class="baseline-header"><i class="fa-solid fa-house-laptop me-1"></i> Authorized Geolocation</div>
+                        <div class="mb-2">
+                            <span class="text-muted small d-block">Trusted baseline City/Country</span>
+                            <span class="fw-bold text-white" id="baseLoc">Pune, India</span>
+                        </div>
+                    </div>
+
+                    <div class="baseline-box mb-3">
+                        <div class="baseline-header"><i class="fa-solid fa-laptop me-1"></i> Registered Device & OS</div>
+                        <div class="mb-2">
+                            <span class="text-muted small d-block">Authorized operating system & browser</span>
+                            <span class="fw-bold text-white" id="baseDevice">Windows (Chrome)</span>
+                        </div>
+                    </div>
+
+                    <div class="baseline-box">
+                        <div class="baseline-header"><i class="fa-solid fa-clock me-1"></i> Standard Working Hours</div>
+                        <div>
+                            <span class="text-muted small d-block">Historical Average Working Hour</span>
+                            <span class="fw-bold text-white font-monospace" id="baseHour">12:00 UTC</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Log out handler
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = "/login";
+        }
+
+        // Fetch User Personal Telemetry
+        async function fetchUserTelemetry() {
+            const userEmail = localStorage.getItem('tw_logged_in_email');
+            if (!userEmail) return;
+
+            try {
+                const response = await fetch(`/api/v1/analysis/user-stats?email=${userEmail}`);
+                if (!response.ok) throw new Error("Database fetch error.");
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('userNameLabel').innerText = "Account Error";
+                    document.getElementById('userEmailLabel').innerText = "Logged in user not registered inside database.";
+                    return;
+                }
+
+                // Render Labels
+                document.getElementById('userNameLabel').innerText = `Welcome back, ${data.username}!`;
+                document.getElementById('userEmailLabel').innerText = `${userEmail} | Department: ${data.department}`;
+
+                // Update Metrics Card
+                document.getElementById('stat-total-logins').innerText = data.metrics.total_logins;
+                document.getElementById('stat-success-logins').innerText = data.metrics.success_logins;
+                document.getElementById('stat-failed-logins').innerText = data.metrics.fail_logins;
+
+                // Render baselines
+                document.getElementById('baseLoc').innerText = `${data.baseline.common_city}, ${data.baseline.common_country}`;
+                document.getElementById('baseDevice').innerText = `${data.baseline.common_os}`;
+                document.getElementById('baseHour').innerText = `${Math.floor(data.baseline.avg_login_hour)}:00 UTC (Daytime baseline)`;
+
+                // Render History list (completely omitting risk score and anomaly levels)
+                const body = document.getElementById('userEventsBody');
+                body.innerHTML = "";
+
+                if (data.recent_events.length === 0) {
+                    body.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No personal access history logged.</td></tr>`;
+                    return;
+                }
+
+                data.recent_events.forEach(evt => {
+                    const tr = document.createElement('tr');
+                    
+                    const statusText = evt.status === 'success' 
+                        ? `<span class="badge bg-success-subtle text-success p-1 px-2 rounded">Success</span>`
+                        : `<span class="badge bg-danger-subtle text-danger p-1 px-2 rounded">Failed</span>`;
+
+                    const dateFormatted = new Date(evt.timestamp).toLocaleString();
+
+                    tr.innerHTML = `
+                        <td class="small text-muted">${dateFormatted}</td>
+                        <td><i class="fa-solid fa-location-dot text-muted me-1 small"></i> ${evt.location}</td>
+                        <td class="small font-monospace">${evt.os}</td>
+                        <td class="small text-muted">${evt.browser}</td>
+                        <td>${statusText}</td>
+                    `;
+                    body.appendChild(tr);
+                });
+
+            } catch (err) {
+                console.error("Failed to query database user workspace telemetry.", err);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', fetchUserTelemetry);
+    </script>
+</body>
+</html>
