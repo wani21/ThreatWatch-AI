@@ -1,0 +1,10 @@
+{
+  "threshold": 0.055479757487773895,
+  "err_min": 0.0008065263391472399,
+  "err_max": 16.315597534179688,
+  "latent_dim": 16,
+  "input_dim": 53,
+  "auc_roc": 0.9993,
+  "avg_precision": 0.9986,
+  "percentile_used": 95
+}
