@@ -74,3 +74,6 @@ Desktop.ini
 # Machine Learning Models
 *.pkl
 *.pickle
+
+# Dataset Directories
+Excel_dataset/

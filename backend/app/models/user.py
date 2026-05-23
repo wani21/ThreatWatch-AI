@@ -14,6 +14,7 @@ class User(Base):
     )
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    password: Mapped[str] = mapped_column(String(100), default="password123")
     role: Mapped[str] = mapped_column(String(30), default="user")
     department: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
