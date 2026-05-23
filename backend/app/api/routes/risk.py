@@ -14,6 +14,7 @@ class RiskAssessmentResponse(BaseModel):
     event_id: str = Field(..., description="The unique identifier of the assessed login event.")
     risk_score: int = Field(..., description="The calculated normalized combined risk score [0, 100].")
     risk_level: str = Field(..., description="The threat classification level: LOW, MEDIUM, HIGH, CRITICAL.")
+    anomaly_score: float = Field(..., description="The calculated normalized AI anomaly score [0.0, 1.0].")
     reasons: List[str] = Field(..., description="List of explainable security hazard findings triggered by this login attempt.")
 
 
@@ -47,6 +48,7 @@ def evaluate_event_risk(event_id: str, db: Session = Depends(get_db)):
             event_id=result["event_id"],
             risk_score=result["risk_score"],
             risk_level=result["risk_level"],
+            anomaly_score=result["anomaly_score"],
             reasons=result["reasons"]
         )
 

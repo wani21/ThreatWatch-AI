@@ -105,5 +105,6 @@ class RiskAssessmentService:
             "event_id": str(event_id),
             "risk_score": int(assessment.total_score),
             "risk_level": assessment.risk_level,
+            "anomaly_score": float(assessment.anomaly_score),
             "reasons": assessment.risk_factors
         }
